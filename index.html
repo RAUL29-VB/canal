@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudio Cine 3D Misterio | Animación 3D Cel-Shaded Full HD 1080p</title>
+  <link rel="stylesheet" href="./styles.css?v=5">
+  <script defer src="./engine/vendor/three.min.js?v=5"></script>
+  <script defer src="./episodes/hayumarca.js?v=5"></script>
+  <script defer src="./engine/stickman.js?v=5"></script>
+  <script defer src="./engine/cinema3d.js?v=5"></script>
+  <script defer src="./engine/audio.js?v=5"></script>
+  <script defer src="./engine/studio.js?v=5"></script>
+</head>
+<body>
+  <header class="studio-header">
+    <div>
+      <h1>Estudio Cine 3D Misterio</h1>
+      <p class="subtitle-tag">Animación 3D Cel-Shaded Profesional · Full HD 1080p — YouTube Largo (16:9), Short (9:16) y FB / TikTok Completo (9:16)</p>
+    </div>
+    <div class="header-controls">
+      <div class="episode-picker">
+        <label for="episode-select">Episodio:</label>
+        <select id="episode-select"></select>
+      </div>
+      <div class="format-switcher" role="group" aria-label="Formato de video">
+        <button type="button" id="fmt-full" class="is-selected" aria-pressed="true">YouTube Largo 16:9 (Full HD)</button>
+        <button type="button" id="fmt-short" aria-pressed="false">YouTube Short 9:16 (Full HD)</button>
+        <button type="button" id="fmt-reel" aria-pressed="false">FB / TikTok Completo 9:16 (Full HD)</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="studio-layout">
+    <section class="stage-panel" aria-labelledby="stage-heading">
+      <h2 id="stage-heading">Vista previa interactiva del video</h2>
+
+      <div class="canvas-frame">
+        <canvas id="stage-canvas" width="1920" height="1080" aria-label="Lienzo interactivo de animación cartoon de misterio Full HD"></canvas>
+      </div>
+      <p class="hint-line">Tip: pasa el cursor para guiar su mirada y la linterna, haz clic sobre un personaje para que reaccione o arrástralo para moverlo.</p>
+
+      <p id="caption-live" class="visually-hidden" aria-live="polite"></p>
+
+      <div class="transport-bar">
+        <button type="button" id="btn-play" class="btn-primary">Reproducir</button>
+        <button type="button" id="btn-restart">Reiniciar</button>
+        <button type="button" id="btn-reset-pos">Restablecer posiciones</button>
+        <div class="scrubber-wrap">
+          <label for="timeline-scrubber" class="visually-hidden">Línea de tiempo del video</label>
+          <input type="range" id="timeline-scrubber" min="0" max="60" step="0.05" value="0">
+          <span id="time-readout" class="time-readout">00:00 / 00:00</span>
+        </div>
+      </div>
+
+      <div class="export-bar">
+        <button type="button" id="btn-export" class="btn-export">Exportar Full HD 1080p (.mp4)</button>
+        <label class="checkbox-inline" for="interactive-flashlight">
+          <input type="checkbox" id="interactive-flashlight" checked>
+          Linterna interactiva con el cursor
+        </label>
+        <progress id="export-progress" max="100" value="0" hidden aria-label="Progreso de exportación de video"></progress>
+      </div>
+
+      <ul id="scene-list" class="scene-strip" aria-label="Escenas del formato actual"></ul>
+
+      <section class="social-section" aria-labelledby="social-heading">
+        <h3 id="social-heading">Textos Optimizados para Redes Sociales (Copiar y Pegar)</h3>
+        <div class="social-grid">
+          <article class="social-card" id="card-yt">
+            <h4>YouTube (Largo 16:9 / Short 9:16)</h4>
+            <div class="copy-row">
+              <label for="yt-title">Título</label>
+              <button type="button" class="btn-copy" data-copy-target="yt-title">Copiar título</button>
+            </div>
+            <input type="text" id="yt-title" class="social-input" readonly>
+            <div class="copy-row">
+              <label for="yt-desc">Descripción y etiquetas</label>
+              <button type="button" class="btn-copy" data-copy-target="yt-desc">Copiar descripción</button>
+            </div>
+            <textarea id="yt-desc" class="social-textarea" readonly></textarea>
+          </article>
+
+          <article class="social-card" id="card-fb">
+            <h4>Facebook Reels (Vertical 9:16 Full HD)</h4>
+            <div class="copy-row">
+              <label for="fb-title">Título del Reel</label>
+              <button type="button" class="btn-copy" data-copy-target="fb-title">Copiar título</button>
+            </div>
+            <input type="text" id="fb-title" class="social-input" readonly>
+            <div class="copy-row">
+              <label for="fb-desc">Descripción</label>
+              <button type="button" class="btn-copy" data-copy-target="fb-desc">Copiar descripción</button>
+            </div>
+            <textarea id="fb-desc" class="social-textarea" readonly></textarea>
+          </article>
+
+          <article class="social-card" id="card-tt">
+            <h4>TikTok (Vertical 9:16 Full HD)</h4>
+            <div class="copy-row">
+              <label for="tt-desc">Descripción y hashtags</label>
+              <button type="button" class="btn-copy" data-copy-target="tt-desc">Copiar texto</button>
+            </div>
+            <textarea id="tt-desc" class="social-textarea" readonly></textarea>
+          </article>
+        </div>
+      </section>
+
+      <details class="transcript-box">
+        <summary>Ver transcripción completa y tiempos de escena</summary>
+        <ol id="transcript-list" class="transcript-list"></ol>
+      </details>
+    </section>
+
+    <aside class="editor-panel" aria-labelledby="editor-heading">
+      <h2 id="editor-heading">Voz, Gemini y Guion</h2>
+
+      <section class="control-group clone-card" aria-labelledby="clone-heading">
+        <h3 id="clone-heading">Clonación de voz automática (Local y Gratis)</h3>
+        <p id="server-badge" class="server-badge">Comprobando servidor local...</p>
+        <div class="inline-fields">
+          <button type="button" id="btn-record-voice">Grabar mi voz (10s)</button>
+          <button type="button" id="btn-clone-voice" class="btn-primary" disabled>Clonar mi voz para este video</button>
+        </div>
+        <div class="field-stack">
+          <label for="sample-file">O sube un audio corto de tu voz (6-15s, .wav/.mp3/.m4a)</label>
+          <input type="file" id="sample-file" accept="audio/*">
+        </div>
+      </section>
+
+      <section class="control-group gemini-card" aria-labelledby="gemini-heading">
+        <h3 id="gemini-heading">Crear Nuevo Episodio con Gemini Pro</h3>
+        <div class="field-stack">
+          <label for="gemini-topic">Tema del nuevo misterio (ej: El Barco Fantasma Mary Celeste)</label>
+          <input type="text" id="gemini-topic" placeholder="Escribe el suceso misterioso...">
+        </div>
+        <div class="transport-bar">
+          <button type="button" id="btn-copy-prompt" class="btn-primary">Copiar Prompt para Gemini Web</button>
+        </div>
+        <div class="field-stack">
+          <label for="import-episode-json">Pega aquí el JSON que te respondió gemini.google.com</label>
+          <textarea id="import-episode-json" class="code-textarea" spellcheck="false" placeholder="Pega aquí la respuesta JSON de Gemini Pro..."></textarea>
+        </div>
+        <div class="transport-bar">
+          <button type="button" id="btn-import-episode">Importar nuevo episodio</button>
+        </div>
+        <details class="api-details">
+          <summary>Opcional: Generar directo con API Key de Google AI Studio</summary>
+          <div class="field-stack">
+            <label for="gemini-api-key">API Key gratuita (aistudio.google.com)</label>
+            <input type="password" id="gemini-api-key" placeholder="AIza...">
+          </div>
+          <div class="transport-bar">
+            <button type="button" id="btn-generate-api">Generar automático con API</button>
+          </div>
+        </details>
+      </section>
+
+      <section class="control-group" aria-labelledby="audio-heading">
+        <h3 id="audio-heading">Ambiente, Efectos y Audio manual</h3>
+        <div class="inline-fields">
+          <label for="audio-enabled">
+            <input type="checkbox" id="audio-enabled" checked>
+            Activar ambiente y efectos de misterio
+          </label>
+          <label for="tts-enabled">
+            <input type="checkbox" id="tts-enabled">
+            Vista previa rápida con voz TTS del navegador
+          </label>
+        </div>
+        <div class="field-stack">
+          <label for="audio-volume">Volumen maestro</label>
+          <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="0.6">
+        </div>
+        <div class="field-stack">
+          <label for="voice-file">Cargar audio de tu voz clonada (.mp3, .wav, .ogg)</label>
+          <div class="inline-fields">
+            <input type="file" id="voice-file" accept="audio/*">
+            <button type="button" id="btn-sync-voice" disabled>Ajustar escenas al audio</button>
+          </div>
+          <audio id="voice-player" hidden></audio>
+        </div>
+      </section>
+
+      <section class="control-group" aria-labelledby="script-heading">
+        <h3 id="script-heading">Editor rápido de escenas y keyframes (JSON)</h3>
+        <div class="field-stack">
+          <label for="script-json">Escenas del formato seleccionado</label>
+          <textarea id="script-json" class="code-textarea" spellcheck="false"></textarea>
+        </div>
+        <div class="transport-bar">
+          <button type="button" id="btn-apply-json">Aplicar cambios al guion</button>
+        </div>
+      </section>
+
+      <div id="status-live" class="status-banner" role="status" aria-live="polite">
+        Listo. Selecciona un episodio, clona tu voz o copia los textos para tus redes.
+      </div>
+    </aside>
+  </main>
+
+  <footer class="studio-footer">
+    Estudio local HTML5 Canvas 60 FPS + Web Audio + FFmpeg. Exporta en .mp4 listo para YouTube, Facebook y TikTok.
+  </footer>
+
+  <dialog id="progress-modal" class="progress-modal" aria-labelledby="progress-title">
+    <h2 id="progress-title">Procesando...</h2>
+    <p id="progress-detail" class="progress-detail">Iniciando tarea...</p>
+    <div class="progress-meter-row">
+      <progress id="modal-progress" max="100" value="0" aria-labelledby="progress-title"></progress>
+      <span id="progress-percent" class="progress-percent">0%</span>
+    </div>
+    <div class="progress-actions">
+      <button type="button" id="btn-cancel-modal">Cancelar / Ocultar</button>
+    </div>
+  </dialog>
+</body>
+</html>

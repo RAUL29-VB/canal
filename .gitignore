@@ -1,0 +1,16 @@
+# Entornos virtuales de Python
+voz/.venv/
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Archivos de video pesados (superan el límite de 100MB de GitHub)
+exportados/
+*.mp4
+
+# Archivos del sistema
+Thumbs.db
+Desktop.ini
+.DS_Store
